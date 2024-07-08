@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>My first three.js app</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+    <p id="fileExtensionMessage">Error message !!!!</p>
+    <div class="header" id="headerHidden"> 
+        <h1 id="fileTitle">Header</h1>
+        <p>My supercool header</p>
+        <div class="managePanel">
+            <div class="btnGroupMoreLess">
+                <button class="btn btnMoreLess" id="btnNext">+</button>
+                <button class="btn btnMoreLess" id="btnPrevious">&#8722;</button>
+            </div>
+            <input type="range" min="1" max="100" value="50" class="slider" id="sliderValue">
+            <p id="timeInfo">Temps de la linge</p>
+            <button class="btn" id="backButton">Retour</button>
+        </div>
+        <div class="infoPanel">
+            <p id="actualLine">Voici la ligne actuel</p>
+            <p id="numOfLine">ne lumero de la ligne/Ligne max</p>
+        </div>
+    </div>
+    <div id="fileContents"></div>
+
+    <!-- Inclure la version non modulaire (UMD) de Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Selectionner un fichier -->
+    <div class="centerWrapper" id="hiddenFileSelector">
+        <div class="inputWrapper">
+            <input class="fileInput" type="file" id="fileInput">
+            <span class="fileIcon"></span>
+            <span class="fileTitle">Upload File</span>
+            <!-- TODO faire un drop area -->
+        </div>
+
+    </div>
+    
+    
+    
+    <!-- <div id="hidden-simulator" class="hidden"> -->
+
+        <!-- Slider -->
+        <!-- <input type="range" min="1" max="1000" value="1" id="slider"> -->
+    
+        <!-- Affichage de la valeur du slider -->
+        <!-- <p>Ligne : <span id="sliderValue">1</span></p> -->
+        <!-- <div id="info">Ma ligne</div> -->
+
+    <!-- </div> -->
+
+
+    <script src ="./file.js"></script>
+    <!-- <script src="./renderManager.js"></script> -->
+    <!-- <script src="./main.js"></script> -->
+    
+</body>
+</html>
+
