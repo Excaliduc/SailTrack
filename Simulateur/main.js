@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 const fileInput = document.getElementById("fileInput");
 const fileContent = document.getElementById("fileContent");
 const slider = document.getElementById("sliderValue");
@@ -11,56 +13,47 @@ const actualLine = document.getElementById("actualLine");
 const btnPrevious = document.getElementById("btnPrevious");
 const btnNext = document.getElementById("btnNext");
 const panelHidden = document.getElementById("panelHidden");
+const mapDirId = document.getElementById("map");
+const giteSimulateur = document.getElementById('giteSimulateur');
 
 const DELIMITER = ';';
 const NEWLINE = '\n';
 
 const allowedExtensions = ["txt","csv"];
 
-const reader = new FileReader();
+// Création de la scène et de la caméra
+const threeScene = new THREE.Scene();
+const threeCamera = new THREE.PerspectiveCamera(75, giteSimulateur.clientWidth / giteSimulateur.clientHeight, 0.1, 1000);
+// Création du renderer
+const threeRenderer = new THREE.WebGLRenderer();
 
+
+// Création d'un cube
+const threeGeometry = new THREE.BoxGeometry(1, 1, 1);
+const threeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const threeCube = new THREE.Mesh(threeGeometry, threeMaterial);
+
+let marker;
 var map = L.map('map').setView([51.505, -0.09], 13);
-// TODO à implementer les tamplate de map
-
-/*var Jawg_Terrain = L.tileLayer('https://tile.jawg.io/jawg-terrain/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
-	attribution: '<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-	minZoom: 0,
-	maxZoom: 22,
-	accessToken: '<your accessToken>'
-});
-var OpenWeatherMap_Wind = L.tileLayer('http://{s}.tile.openweathermap.org/map/wind/{z}/{x}/{y}.png?appid={apiKey}', {
-	maxZoom: 19,
-	attribution: 'Map data &copy; <a href="http://openweathermap.org">OpenWeatherMap</a>',
-	apiKey: '<insert your api key here>',
-	opacity: 0.5
-});*/
-
-
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-
-
 let tabOfFileContent = [];
 
 window.onload = function() {
-    // Votre code à exécuter après le chargement de la page
     console.log("La page a été entièrement chargée !");
+    animate();  // Assurez-vous que l'animation commence après le chargement de la page
 };
 
 if (fileInput) {
     fileInput.addEventListener("change", (event) => {
-        const file = event.target.files[0]; // TODO: implementer un système pour gérer plusieurs fichiers à la fois et créer plusieurs instances du simulateur
+        const file = event.target.files[0];
 
         if (file) {
-            console.log("On est dans le if file");
             const fileName = file.name;
             const fileExtension = fileName.split('.').pop().toLowerCase();
-            console.log(fileName);
-            console.log(fileExtension);
-            console.log("fin du file info");
 
             if (allowedExtensions.includes(fileExtension)) {
                 fileTitle.innerHTML = fileName;
@@ -68,18 +61,24 @@ if (fileInput) {
                 hiddenSimulator.style.display = "block";
                 panelHidden.style.display = "flex";
                 fileExtensionMessage.style.display = "none";
-                console.log("L'extension correspond !");
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
+
+                threeRenderer.setSize(giteSimulateur.clientWidth, giteSimulateur.clientHeight);
+                giteSimulateur.appendChild(threeRenderer.domElement);
+                threeScene.add(threeCube);
+                updateRenderer();
                 parseCSV(file);
             } else {
-                console.log("L'extension ne correspond pas !");
                 fileExtensionMessage.innerHTML = "Extension de fichier non autorisée.";
                 fileExtensionMessage.style.display = "block";
-                fileInput.value = ""; // Réinitialise la sélection de fichier
+                fileInput.value = "";
             }
         } else {
             fileExtensionMessage.innerHTML = "Aucun fichier sélectionné.";
             fileExtensionMessage.style.display = "block";
-            fileContent.textContent = ""; // Vide le contenu affiché
+            fileContent.textContent = "";
         }
     });
 }
@@ -109,6 +108,7 @@ if (backButton) {
         fileInput.value = "";
         hiddenFileSelector.style.display = "flex";
         hiddenSimulator.style.display = "none";
+        panelHidden.style.display = "none";
         tabOfFileContent = [];
     };
 }
@@ -122,10 +122,12 @@ function parseCSV(file) {
         toTable(e.target.result);
         slider.max = tabOfFileContent.length;
         updateSliderInfo();
-        const latlngs = tabOfFileContent.map(coord => [coord.latitude, coord.longitude]);
-        console.log(latlngs);
-        const polyline = L.polyline(latlngs, { color: 'blue' }).addTo(map);
-        map.fitBounds(polyline.getBounds());
+
+        setTimeout(() => {
+            const latlngs = tabOfFileContent.map(coord => [coord.latitude, coord.longitude]);
+            const polyline = L.polyline(latlngs, { color: 'blue' }).addTo(map);
+            map.fitBounds(polyline.getBounds());
+        }, 100);
     };
     fr.readAsText(file);
 }
@@ -133,48 +135,51 @@ function parseCSV(file) {
 function toTable(text) {
     if (!text) return;
 
-    // Split the data into lines and remove any trailing newlines or carriage returns
     let lines = text.split(NEWLINE).map(line => line.trim());
-    // Extract headers
     let headers = lines.shift().split(DELIMITER);
 
     lines.forEach(line => {
-        // Split each line by the delimiter to get columns
         let columns = line.split(DELIMITER);
-        // Create an object to store the current line's data
         let obj = {};
-        // Map each column to the corresponding header
         headers.forEach((header, index) => {
-            // Trim the value to remove any unwanted characters like '\r'
             obj[header] = columns[index];
         });
-        // Add the object to the result array
         tabOfFileContent.push(obj);
     });
     console.log(tabOfFileContent);
 }
 
-
 function updateSliderInfo() {
     numOfLine.innerHTML = slider.value + '/' + slider.max;
     if (tabOfFileContent && tabOfFileContent[slider.value - 1]) {
         actualLine.innerHTML = tabOfFileContent[slider.value - 1].direction;
-        if(typeof marker == 'undefined')
-        {
+        if (typeof marker == 'undefined') {
             marker = L.marker([tabOfFileContent[slider.value - 1].latitude, tabOfFileContent[slider.value - 1].longitude]).addTo(map);
-            // Ajuste la vue sur le point 
-            // map.setView([tabOfFileContent[slider.value - 1].latitude, tabOfFileContent[slider.value - 1].longitude], 12); 
-        } 
-        else
-        {
+        } else {
             marker.remove();
             marker = L.marker([tabOfFileContent[slider.value - 1].latitude, tabOfFileContent[slider.value - 1].longitude]).addTo(map);
-            // Ajuste la vue sur le point 
-            // map.setView([tabOfFileContent[slider.value - 1].latitude, tabOfFileContent[slider.value - 1].longitude], 12);
         }
     }
 }
 
-function path() {
-    
+// Fonction d'animation continue
+function animate() {
+    requestAnimationFrame(animate);
+    threeCube.rotation.x += 0.01;
+    threeCube.rotation.y += 0.01;
+    threeRenderer.render(threeScene, threeCamera);
 }
+
+// Mise à jour de la taille du renderer et de la caméra
+function updateRenderer() {
+    const width = giteSimulateur.clientWidth;
+    const height = giteSimulateur.clientHeight;
+    if (width > 0 && height > 0) {
+        threeRenderer.setSize(width, height);
+        threeCamera.aspect = width / height;
+        threeCamera.updateProjectionMatrix();
+    }
+}
+
+// Gestion du redimensionnement de la fenêtre
+window.addEventListener('resize', updateRenderer);

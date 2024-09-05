@@ -11,7 +11,17 @@
 </head>
 <body>
     <!-- Inclure la version non modulaire (UMD) de Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.149.0/examples/jsm/"
+          }
+        }
+    </script>
+    <!-- V1 de l'import TODO regler ce problemme -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script> -->
+    
     <!-- Inclure la version non modulaire (UMD) de leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
@@ -48,13 +58,14 @@
     
     <div class="panelContainer" id="panelHidden">
         <div class="panel" id="map"></div>
-        <div class="panel" id="giteSimulateur"></div>
+        <div class="panel" id="giteSimulateur">
+        </div>
     </div>    
 
 
-    <script src ="./main.js"></script>
+    <script type="module" src ="./main.js"></script>
+    <!-- <script type="module" src="./test.js"></script>   -->
     <!-- <script src="./renderManager.js"></script> -->
-    <!-- <script src="./maintree.js"></script> -->
     
 </body>
 </html>
