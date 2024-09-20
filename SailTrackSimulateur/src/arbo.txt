@@ -1,0 +1,35 @@
+my-vue-app/
+│
+├── public/
+│   ├── index.html
+│   └── assets/
+│       └── logo.png
+│
+├── src/
+│   ├── assets/
+│   ├── components/
+│   │   ├── MapView.vue
+│   │   ├── ThreeScene.vue
+│   │   ├── FileUploader.vue
+│   │   ├── ControlBar.vue
+│   │   └── DataSlider.vue
+│   │
+│   ├── views/
+│   │   └── Dashboard.vue
+│   │
+│   ├── router/
+│   │   └── index.js
+│   │
+│   ├── store/
+│   │   └── index.js
+│   │
+│   ├── styles/
+│   │   └── main.scss
+│   │
+│   ├── App.vue
+│   └── main.js
+│
+├── .gitignore
+├── package.json
+├── vue.config.js
+└── README.md
